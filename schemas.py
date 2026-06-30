@@ -1,12 +1,12 @@
-from typing import Any
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, AliasPath, AliasChoices
 
 
 class AnimeResponse(BaseModel):
     id:int
-    title: str = Field(validation_alias="name_anime")
-    image_url: str | None = None
+    title: str = Field(validation_alias=AliasChoices("name_anime","title"))
+    image_url: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -30,3 +30,11 @@ class AnimeResponse(BaseModel):
             data["image_url"] = jpg.get("image_url")
 
         return data
+    
+
+class UserFavoriteResponse(BaseModel):
+    status: str
+    anime_id: int
+    title: str = Field(validation_alias=AliasPath("anime", "name_anime"))
+
+    model_config = {"from_attributes":True}

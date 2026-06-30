@@ -2,12 +2,13 @@ from fastapi import APIRouter, HTTPException, Request
 import httpx 
 from typing import List
 from fastapi import Depends
-from schemas import AnimeResponse
+from schemas import AnimeResponse, UserFavoriteResponse
 from main import state, JIKAN_URL
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from sqlalchemy import select
-from models import Anime
+from models import Anime, UserAnimeList, User
+from sqlalchemy.orm import selectinload, joinedload
 
 
 app = APIRouter(prefix="/anime", tags= ["Anime"])
@@ -93,3 +94,79 @@ async def search_anime(query: str, request: Request, db: AsyncSession = Depends(
             status_code=503,
             detail="Сервис MyAnimeList (Jikan) временно недоступен"
         )
+
+
+@app.post("/favorite")
+async def add_favorite(user_id: int, anime_id: int, status: str, db: AsyncSession = Depends(get_db)):
+    
+    try:
+        anime_exists = await db.get(Anime, anime_id)
+        if anime_exists == None:
+            raise HTTPException(
+                status_code= 404,
+                detail= "Аниме не закэшировано"                               
+                                )
+        
+        new_favorite = UserAnimeList(
+        user_id = user_id,
+        anime_id = anime_id,
+        status = status     
+        )
+    
+        db.add(new_favorite)
+        await db.commit()
+        return "успешно добавлено в списки"
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail= f"ошибка при добавлении в избранное {str(e)}"
+            
+            )
+    
+
+
+@app.get("/user/{user_id}/favorite", response_model = List[UserFavoriteResponse])
+async def favorite_list(user_id:int, db:AsyncSession = Depends(get_db)):
+    try:
+        stms = select(User).where(User.id == user_id).options(selectinload(User.anime_associations).joinedload(UserAnimeList.anime))
+        result = await db.execute(stms)
+        user = result.scalar_one_or_none()
+
+
+        if user is None:
+            raise HTTPException(status_code=404,detail='Юзер в базе не найден')
+        
+
+        return user.anime_associations
+    
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail= f"Ошибка при получении избранного {str(e)}" )
+    
+
+
+@app.delete("/user/{user_id}/favorite/{anime_id}")
+async def delete_favorite(user_id: int, anime_id: int, db:AsyncSession = Depends(get_db)):
+    try:
+        stms = select(UserAnimeList).where(UserAnimeList.user_id == user_id, UserAnimeList.anime_id == anime_id)
+        result = await db.execute(stms)
+        favorite = result.scalar_one_or_none()
+
+        if favorite is None:
+            raise HTTPException(status_code=404,detail='Данное аниме не найдено в списке этого пользователя')
+
+
+        await db.delete(favorite)
+        await db.commit()
+
+        return f"{anime_id} успешно удален из избранного"
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail= f"Ошибка при удалении из избранного {str(e)}")
+
