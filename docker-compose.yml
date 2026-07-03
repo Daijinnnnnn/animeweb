@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: "${DB_NAME:-animeweb}"
+      POSTGRES_USER: "${DB_USER:-user}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:?POSTGRES_PASSWORD is required}"
+    ports:
+      - "${DB_PORT:-5435}:5432"
+    volumes:
+      - animeveb_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  animeveb_postgres_data:
+    

@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+animeweb.egg-info/PKG-INFO
+animeweb.egg-info/SOURCES.txt
+animeweb.egg-info/dependency_links.txt
+animeweb.egg-info/requires.txt
+animeweb.egg-info/top_level.txt
