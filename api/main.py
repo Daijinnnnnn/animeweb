@@ -23,6 +23,6 @@ async def lifespan(app:FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-from api import app as anime_router
+from api.v1.api import app as anime_router
 
 app.include_router(anime_router)
