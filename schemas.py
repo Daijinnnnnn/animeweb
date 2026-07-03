@@ -34,3 +34,8 @@ class UserFavoriteResponse(BaseModel):
     title: str = Field(validation_alias=AliasPath("anime", "name_anime"))
 
     model_config = {"from_attributes": True}
+
+
+class UserRegisterSchema(BaseModel):
+    email_address:str
+    password:str
