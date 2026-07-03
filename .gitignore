@@ -1,8 +1,8 @@
 .idea/
 
-*.env
+.env
 !*.env.example
 
-**/__pycache__.py
+**/__pycache__
 
 .venv
