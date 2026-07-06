@@ -77,7 +77,6 @@ async def protected(creds:UserLoginSchema, response: Response, db: AsyncSession 
 
 async def get_current_user_id(request: Request, response: Response) -> int:
     try:
-
         token_data = await security.get_token_from_request(request, response, type="access")
         return int(token_data.sub)
     except:
