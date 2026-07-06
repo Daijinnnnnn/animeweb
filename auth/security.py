@@ -8,4 +8,4 @@ def hash_password(password:str) -> str:
     return password_hash.hash(password)
 
 def verify_password(password:str,hashed_password:str) -> bool:
-    return hash_password.verify(password, hash_password)
+    return password_hash.verify(password, hashed_password)
