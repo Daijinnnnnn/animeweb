@@ -22,7 +22,6 @@ class AnimeResponse(BaseModel):
         if "images" in data:
             images = data.get("images", {})
             jpg = images.get("jpg", {})
-
             data["image_url"] = jpg.get("image_url")
 
         return data
