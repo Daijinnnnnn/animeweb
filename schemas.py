@@ -39,3 +39,6 @@ class UserFavoriteResponse(BaseModel):
 class UserRegisterSchema(BaseModel):
     email_address:str
     password:str
+
+class UserLoginSchema(UserRegisterSchema):
+    ...
